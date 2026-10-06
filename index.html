@@ -1,0 +1,128 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>FrameTrace - DVR/NVR Forensic Platform</title>
+<style>
+:root{--bg:#f1f3f6;--card:#fff;--ink:#101a2b;--mut:#5c6a7e;--line:#d8dee8;--acc:#0f7f86;--rec:#d98e04;--ok:#1d8a4e;--bad:#c53a32;--side:#101a2b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a111d;--card:#111b2c;--ink:#e5ecf6;--mut:#91a2ba;--line:#223149;--acc:#2fc0c8;--rec:#f2b035;--ok:#3ccf7d;--bad:#ff6b63;--side:#070c15}}
+:root[data-theme="dark"]{--bg:#0a111d;--card:#111b2c;--ink:#e5ecf6;--mut:#91a2ba;--line:#223149;--acc:#2fc0c8;--rec:#f2b035;--ok:#3ccf7d;--bad:#ff6b63;--side:#070c15}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+#side{background:var(--side);color:#c9d4e4;padding:18px 12px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{font:700 20px Georgia,"Iowan Old Style",serif;color:#fff;margin:0 6px 2px}.brand+p{margin:0 6px 18px;font-size:12px;color:#8fa0b8}
+#side button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;color:inherit;padding:9px 8px;border-radius:6px;cursor:pointer;font:inherit}
+#side button b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1px solid #3a4a63;font-size:11px}
+#side button.on{background:#1b2a42;color:#fff}#side button.on b,#side button.dn b{background:var(--acc);border-color:var(--acc);color:#04181a}
+#side button.lock{opacity:.4;cursor:not-allowed}#side hr{border:0;border-top:1px solid #243349;margin:12px 0}
+main{padding:26px 30px 60px;max-width:1080px;width:100%}
+h1{font:700 26px/1.2 Georgia,"Iowan Old Style",serif;margin:0 0 4px}h2{font:700 17px Georgia,serif;margin:0 0 10px}.mut{color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:16px;margin:14px 0}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.k{border-left:3px solid var(--acc);padding:2px 10px}.k b{display:block;font-size:22px}.k.r{border-color:var(--rec)}.k.x{border-color:var(--bad)}
+label{display:block;font-size:12px;color:var(--mut)}input,select,textarea{width:100%;box-sizing:border-box;margin-top:3px;padding:8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit}
+.btn{background:var(--acc);color:#fff;border:0;border-radius:6px;padding:9px 16px;font:600 14px system-ui,-apple-system,"Segoe UI",sans-serif;cursor:pointer;margin:4px 6px 4px 0}.btn.s{background:none;color:var(--ink);border:1px solid var(--line)}
+.btn:focus-visible,#side button:focus-visible,.chip:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.drop{display:block;border:2px dashed var(--line);border-radius:8px;padding:26px;text-align:center;cursor:pointer;color:var(--mut)}.drop:hover{border-color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--mut);font-weight:600}
+.mono{font:12px ui-monospace,Menlo,Consolas,monospace;word-break:break-all}.wrap{overflow-x:auto}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;border:1px solid var(--line)}.tag.d{color:var(--rec);border-color:var(--rec)}.tag.g{color:var(--ok);border-color:var(--ok)}.tag.b{color:var(--bad);border-color:var(--bad)}
+.chip{cursor:pointer;margin:2px 4px 2px 0;background:none;font:inherit;color:var(--ink)}.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.tr{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:center;margin:6px 0;font-size:12px}.bar{position:relative;height:30px;background:var(--bg);border:1px solid var(--line);border-radius:4px}
+.sg{position:absolute;top:0;bottom:0;width:4.1667%;box-shadow:inset 0 0 0 1px var(--card);background:color-mix(in srgb,var(--acc) 35%,transparent)}.sg.rec{background:var(--rec)}.sg.gap{background:repeating-linear-gradient(45deg,var(--bad) 0 3px,transparent 3px 6px);opacity:.7}
+.dt{position:absolute;top:9px;width:12px;height:12px;margin-left:-6px;border-radius:50%;border:2px solid var(--card);box-sizing:border-box;z-index:2}
+.ax{display:flex;justify-content:space-between;margin-left:118px;font-size:11px;color:var(--mut)}.lg span{margin-right:14px;font-size:12px}.lg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}
+.warn{border-left:3px solid var(--rec);background:color-mix(in srgb,var(--rec) 10%,transparent);padding:8px 12px;border-radius:4px;margin:10px 0;font-size:13px}
+.doc{background:var(--card);border:1px solid var(--line);padding:24px;border-radius:8px}
+@media(max-width:780px){#app{display:block}#side{height:auto;position:static;display:flex;overflow-x:auto;padding:8px}#side .brand,#side p,#side hr,#side small{display:none}#side button{white-space:nowrap;width:auto}main{padding:16px}.g2,.g4{grid-template-columns:1fr 1fr}.tr{grid-template-columns:70px 1fr}.ax{margin-left:78px}}
+@media print{#side,.np{display:none!important}#app{display:block}body{background:#fff;color:#000}}
+</style></head><body><div id="app"><aside id="side"></aside><main id="main"></main></div>
+<script>
+const $=s=>document.querySelector(s),H=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''),TE=new TextEncoder();
+const sha=async b=>H(await crypto.subtle.digest('SHA-256',b)),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function md5(u){const K=[],R=[7,12,17,22,5,9,14,20,4,11,16,23,6,10,15,21];for(let i=0;i<64;i++)K[i]=Math.floor(Math.abs(Math.sin(i+1))*4294967296)>>>0;
+const n=u.length,L=(((n+8)>>6)+1)<<6,b=new Uint8Array(L);b.set(u);b[n]=128;const v=new DataView(b.buffer);v.setUint32(L-8,(n<<3)>>>0,true);v.setUint32(L-4,Math.floor(n/536870912),true);
+let a=0x67452301,c=0xefcdab89,d=0x98badcfe,e=0x10325476;
+for(let o=0;o<L;o+=64){let A=a,B=c,C=d,D=e;for(let i=0;i<64;i++){let F,g;if(i<16){F=(B&C)|(~B&D);g=i}else if(i<32){F=(D&B)|(~D&C);g=(5*i+1)%16}else if(i<48){F=B^C^D;g=(3*i+5)%16}else{F=C^(B|~D);g=7*i%16}
+F=(F+A+K[i]+v.getUint32(o+g*4,true))>>>0;A=D;D=C;C=B;const s=R[(i>>4)*4+i%4];B=(B+((F<<s)|(F>>>(32-s))))>>>0}
+a=(a+A)>>>0;c=(c+B)>>>0;d=(d+C)>>>0;e=(e+D)>>>0}
+return[a,c,d,e].map(x=>[0,8,16,24].map(s=>((x>>>s)&255).toString(16).padStart(2,'0')).join('')).join('')}
+const V=[['Hikvision','Hikvision FS (HIKVISION@HANGZHOU)','IMKH stream, H.264/H.265','Signature + carve','Full'],['Dahua','DHFS 4.x','DHAV frames, H.264/H.265','Signature + carve','Full'],['CP Plus','Dahua-OEM (DHFS)','DHAV (most models)','Dahua profile','Full*'],['Honeywell','Mixed OEM (Dahua / Hikvision lines)','Family auto-detect','Family profile','Partial*'],['Uniview','Proprietary','H.264/H.265 + vendor index','Generic carve','Beta'],['TP-Link','Proprietary (VIGI NVR)','H.264/H.265','Generic carve','Beta'],['Godrej','OEM-based, varies by model','Varies','Generic carve','Beta'],['Matrix','Proprietary','Varies','Generic carve','Beta']];
+const STEPS=['Case intake','Acquire & identify','Parse & recover','Timeline & AI','Custody & report'],CAMS=['CH1 Main Gate','CH2 Lobby','CH3 Parking','CH4 Server Room'],OFF=462,LIM=128<<20,LBL={ok:'indexed',rec:'recovered (deleted)',gap:'overwritten'},TC={person:'#2f7de1',face:'#9b5de5',vehicle:'#e07a1f',motion:'#6b7b90'};
+const S={step:0,max:0,c:null,ev:null,rec:null,coc:[],norm:1,flt:null,m:''},T=(h,m,s)=>h*3600+m*60+s,fmt=s=>[s/3600|0,s/60%60|0,s%60].map(x=>String(x).padStart(2,'0')).join(':');
+const busy=async m=>{const e=$('#st');if(e)e.innerHTML='Working: '+m;await new Promise(r=>setTimeout(r,40))};
+async function log(a,d){const p=S.coc.length?S.coc[S.coc.length-1].h:'0'.repeat(64),t=new Date().toISOString();S.coc.push({t,a,d,p,h:await sha(TE.encode(p+t+a+d))})}
+async function chk(){let p='0'.repeat(64);for(let i=0;i<S.coc.length;i++){const e=S.coc[i];if(e.p!==p||await sha(TE.encode(e.p+e.t+e.a+e.d))!==e.h)return i+1;p=e.h}return 0}
+function scan(u){const r={},add=(k,i)=>{(r[k]||(r[k]={n:0,off:i})).n++},m=(i,s)=>{for(let j=0;j<s.length;j++)if(u[i+j]!==s.charCodeAt(j))return 0;return 1};
+for(let i=0,n=u.length-24;i<n;i++){const c=u[i];if(c===72){if(m(i,'HIKVISION@HANGZHOU'))add('HIK-FS',i)}else if(c===73){if(m(i,'IMKH'))add('HIK-STREAM',i)}else if(c===68){if(m(i,'DHFS'))add('DH-FS',i);else if(m(i,'DHAV'))add('DH-FRAME',i)}
+else if(c===0&&u[i+1]===0&&u[i+2]===0&&u[i+3]===1){const t=u[i+4];if(t===0x67)add('H264-SPS',i);else if(t===0x65)add('H264-IDR',i);else if(t===0x40)add('H265-VPS',i)}else if(c===102&&m(i,'ftyp'))add('MP4-FTYP',i)}return r}
+function ident(h){const k=x=>h[x]?h[x].n:0;
+if(k('HIK-FS')||k('HIK-STREAM'))return{name:'Hikvision',conf:Math.min(99,55+(k('HIK-FS')?30:0)+(k('HIK-STREAM')?14:0)),fam:'Hikvision family'};
+if(k('DH-FS')||k('DH-FRAME'))return{name:'Dahua',conf:Math.min(99,50+(k('DH-FS')?30:0)+Math.min(19,k('DH-FRAME'))),fam:'Dahua family (also CP Plus and some Honeywell OEM lines)'};
+if(k('H264-SPS')||k('H265-VPS')||k('MP4-FTYP'))return{name:'Unknown vendor',conf:35,fam:'Generic H.264/H.265 data found. Pick the OEM profile manually.'};
+return{name:'Unidentified',conf:0,fam:'No known signatures in the scanned range.'}}
+function synth(){const u=new Uint8Array(3<<20);let s=12345;for(let i=0;i<u.length;i++){s=(s*1664525+1013904223)>>>0;u[i]=s>>>24}
+const w=(o,t)=>{for(let i=0;i<t.length;i++)u[o+i]=typeof t=='string'?t.charCodeAt(i):t[i]};w(0x400,'DHFS4.1');
+for(let k=0;k<24;k++){const o=0x2000+k*0x20000;w(o,'DHAV');w(o+16,[0,0,0,1,0x67]);w(o+64,[0,0,0,1,0x65])}return u}
+async function loadEv(u,name,demo,full){const buf=u.buffer.slice(u.byteOffset,u.byteOffset+u.length);await busy('hashing (MD5 + SHA-256)');const s=await sha(buf),m=md5(u);await busy('scanning signatures');
+const hits=scan(u),v=ident(hits);S.buf=buf;S.ev={name,size:full||u.length,hashed:u.length,md5:m,sha:s,hits,v,demo};
+await log('EVIDENCE_ACQUIRED',`${name}, ${u.length} bytes read-only, SHA-256 ${s.slice(0,16)}...`);await log('DEVICE_IDENTIFIED',`${v.name} (${v.conf}% confidence)`);S.max=Math.max(S.max,2)}
+function dataset(){const seg=[];for(let c=0;c<4;c++)for(let h=0;h<24;h++)seg.push({c,h,st:h==14?'rec':(c==3&&(h==2||h==3))?'gap':'ok'});
+const ev=[[2,'vehicle',.91,T(14,30,55)],[0,'person',.94,T(14,31,50)],[1,'face',.88,T(14,32,40)],[3,'motion',.97,T(14,35,10)],[0,'vehicle',.9,T(9,12,5)],[1,'person',.86,T(11,45,30)],[2,'vehicle',.92,T(18,20,12)],[0,'motion',.81,T(21,5,44)]].map(([c,ty,cf,t])=>({c,ty,cf,t,src:seg.find(x=>x.c==c&&x.h==(t/3600|0)).st}));
+return{seg,ev,n:k=>seg.filter(x=>x.st==k).length}}
+function incidents(ev){const o=[];for(const e of [...ev].sort((a,b)=>a.t-b.t)){const l=o[o.length-1];if(l&&e.t-l[l.length-1].t<=300)l.push(e);else o.push([e])}return o}
+async function startCase(demo){S.c={no:$('#cn').value||'CASE-0001',inv:$('#inv').value||'Investigating officer',ag:$('#ag').value||'-',nt:$('#nt').value};S.coc=[];S.ev=null;S.rec=null;await log('CASE_OPENED',`${S.c.no} by ${S.c.inv} (${S.c.ag})`);S.max=1;
+if(demo){S.step=1;render();await loadEv(synth(),'DEMO_NVR_4CH.img',true);await recover();S.step=3}else S.step=1;render()}
+async function pick(f){if(!f)return;await busy('reading '+f.name);await loadEv(new Uint8Array(await f.slice(0,LIM).arrayBuffer()),f.name,false,f.size);render()}
+async function demoEv(){await loadEv(synth(),'DEMO_NVR_4CH.img',true);render()}
+function ovr(n){S.ev.v={name:n,conf:100,fam:'Set manually by examiner'};log('PROFILE_OVERRIDE',n);render()}
+async function recover(){await busy('parsing file system and carving unallocated space');S.rec=dataset();await log('FS_PARSED',`Profile: ${prof()}`);await log('RECOVERY_DONE',`${S.rec.n('rec')} deleted segments recovered, ${S.rec.n('gap')} overwritten gaps`);S.max=Math.max(S.max,3);render()}
+const prof=()=>(V.find(x=>x[0]==S.ev.v.name)||V[1])[1];
+async function toReport(){if(!S.rg){S.rg=1;await log('TIMELINE_CORRELATED',`${incidents(S.rec.ev).filter(i=>i.length>1).length} multi-camera incident(s)`);await log('REPORT_GENERATED',S.c.no)}S.max=4;go(4)}
+async function vh(){const ok=await sha(S.buf)===S.ev.sha;await log('HASH_REVERIFIED',ok?'MATCH':'MISMATCH');S.m=`<span class="tag ${ok?'g':'b'}">${ok?'Evidence hash re-verified: MATCH':'MISMATCH: evidence changed'}</span>`;render()}
+async function vc(){const r=await chk();S.m=`<span class="tag ${r?'b':'g'}">${r?'Custody chain broken at entry '+r:'Custody chain intact ('+S.coc.length+' entries)'}</span>`;render()}
+async function tamper(){const e=S.coc[1],o=e.d;e.d+=' [edited]';const r=await chk();e.d=o;S.m=`<span class="tag g">Tamper test: edit to entry 2 detected at entry ${r}. Entry restored.</span>`;render()}
+function go(i){if(i<=S.max||i>=5){S.step=i;S.m='';render()}}
+function nav(){$('#side').innerHTML=`<div class="brand">FrameTrace</div><p>Multi-vendor DVR/NVR forensics</p>`+STEPS.map((t,i)=>`<button class="${S.step==i?'on':''} ${i<S.max?'dn':''} ${i>S.max?'lock':''}" onclick="go(${i})"><b>${i<S.max?'&#10003;':i+1}</b>${t}</button>`).join('')+`<hr><button class="${S.step==5?'on':''}" onclick="go(5)"><b>&equiv;</b>OEM comparison</button><button class="${S.step==6?'on':''}" onclick="go(6)"><b>&#9873;</b>Past cases</button><hr><small style="padding:0 8px;color:#8fa0b8">${S.c?esc(S.c.no)+'<br>'+S.coc.length+' custody entries':'No case open'}</small>`}
+function vCase(){return `<h1>Open a forensic case</h1><p class="mut">One workflow for every recorder brand: acquire, identify, parse, recover, correlate, report. Each action is added to a hash-chained custody log.</p>
+<div class="card"><div class="g2"><label>Case / FIR number<input id="cn" value="CASE-${new Date().getFullYear()}-0001"></label><label>Investigator<input id="inv" value="Insp. A. Kumar"></label><label>Agency<input id="ag" value="Cyber Forensics Lab"></label><label>Notes<input id="nt" placeholder="Seized from premises, sealed bag no. 14"></label></div>
+<p><button class="btn" onclick="startCase(false)">Open case and acquire evidence</button><button class="btn s" onclick="startCase(true)">Run full demo (simulated NVR)</button></p></div>
+<div class="g4"><div class="card k"><b>8</b>OEM profiles</div><div class="card k"><b>2</b>hash algorithms (MD5, SHA-256)</div><div class="card k r"><b>6</b>modules in one tool</div><div class="card k"><b>0</b>bytes written to evidence</div></div>
+<p class="mut">Hashing, signature scanning and the custody chain run on real files you load. The recording index, timeline and AI detections in the demo are simulated.</p>`}
+function vAcq(){const e=S.ev;return `<h1>Acquire and identify</h1><p class="mut">Load a DVR/NVR image, HDD dump or exported file. It is read-only: the browser never modifies the source.</p>
+<label class="drop" ondragover="event.preventDefault()" ondrop="event.preventDefault();pick(event.dataTransfer.files[0])">Drop a file here or click to choose<input type="file" hidden onchange="pick(this.files[0])"></label>
+<p><button class="btn s" onclick="demoEv()">Use demo image instead</button></p><div id="st" class="mut"></div>`+(e?`
+<div class="card"><h2>Integrity</h2><table><tr><th>File</th><td>${esc(e.name)} ${e.demo?'<span class="tag d">demo</span>':''}</td></tr><tr><th>Size</th><td>${e.size.toLocaleString()} bytes</td></tr><tr><th>MD5</th><td class="mono">${e.md5}</td></tr><tr><th>SHA-256</th><td class="mono">${e.sha}</td></tr></table>
+${e.size>e.hashed?`<div class="warn">Only the first ${e.hashed>>20} MB was hashed in the browser. Hash the full image with a dedicated acquisition agent before relying on it in court.</div>`:''}</div>
+<div class="card"><h2>Device identification: ${esc(e.v.name)} <span class="tag ${e.v.conf>70?'g':'d'}">${e.v.conf}% confidence</span></h2><p class="mut">${esc(e.v.fam)}</p>
+<div class="wrap"><table><tr><th>Signature</th><th>Hits</th><th>First offset</th></tr>${Object.entries(e.hits).map(([k,v])=>`<tr><td>${k}</td><td>${v.n.toLocaleString()}</td><td class="mono">0x${v.off.toString(16)}</td></tr>`).join('')||'<tr><td colspan="3">No known signatures found</td></tr>'}</table></div>
+<label style="max-width:300px;margin-top:10px">Override OEM profile<select onchange="ovr(this.value)">${V.map(v=>`<option ${v[0]==e.v.name?'selected':''}>${v[0]}</option>`).join('')}<option>Unknown vendor</option></select></label>
+<p><button class="btn" onclick="S.step=2;render()">Continue to parsing</button></p></div>`:'')}
+function vRec(){const r=S.rec,e=S.ev,hn=k=>e.hits[k]?e.hits[k].n:0,car=Math.max(hn('DH-FRAME')+hn('HIK-STREAM'),hn('H264-IDR'));
+if(!r)return `<h1>Parse and recover</h1><div class="card"><p>Parser profile for <b>${esc(e.v.name)}</b>: ${esc(prof())}</p><div id="st" class="mut"></div><button class="btn" onclick="recover()">Run file-system parse and recovery</button></div>`;
+return `<h1>Parse and recover</h1><p class="mut">Profile: ${esc(prof())}</p><div class="warn">Segment index below is simulated. Carved frame count is real data from your image. Vendor file-system parsers need lab reference images to complete.</div>
+<div class="g4"><div class="card k"><b>${r.n('ok')}</b>segments indexed</div><div class="card k r"><b>${r.n('rec')}</b>deleted, recovered</div><div class="card k x"><b>${r.n('gap')}</b>overwritten (lost)</div><div class="card k"><b>${car}</b>frames carved from image</div></div>
+<div class="card"><h2>Recovery per channel</h2><div class="wrap"><table><tr><th>Channel</th><th>Indexed</th><th>Recovered</th><th>Lost</th><th>Coverage</th></tr>${CAMS.map((n,c)=>{const f=k=>r.seg.filter(s=>s.c==c&&s.st==k).length;return `<tr><td>${n}</td><td>${f('ok')}</td><td>${f('rec')}</td><td>${f('gap')}</td><td>${Math.round((24-f('gap'))*100/24)}%</td></tr>`}).join('')}</table></div>
+<div class="warn">Pattern found: all four channels are missing from the index between 14:00 and 15:00, yet the video exists in unallocated space. This looks like a deliberate deletion, not loop overwrite.</div>
+<button class="btn" onclick="S.max=Math.max(S.max,3);go(3)">Open timeline</button></div>`}
+function vTl(){const r=S.rec,ev=r.ev.filter(e=>!S.flt||e.ty==S.flt),tf=t=>fmt(S.norm?t:t+OFF),inc=incidents(r.ev).filter(i=>i.length>1);
+return `<h1>Timeline and analytics</h1><p class="mut">Simulated demo data. Device clock runs ${OFF}s fast (7m 42s); normalized time corrects it to the reference clock.</p>
+<div class="card np"><button class="btn ${S.norm?'':'s'}" onclick="S.norm=1;render()">Normalized time</button><button class="btn ${S.norm?'s':''}" onclick="S.norm=0;render()">Raw device time</button>
+<span style="margin-left:10px">Filter:</span> <button class="tag chip ${S.flt?'':'on'}" onclick="S.flt=null;render()">all</button>${Object.keys(TC).map(k=>`<button class="tag chip ${S.flt==k?'on':''}" onclick="S.flt='${k}';render()">${k}</button>`).join('')}</div>
+<div class="card"><div class="lg"><span><i style="background:var(--acc);opacity:.4"></i>indexed</span><span><i style="background:var(--rec)"></i>recovered</span><span><i style="background:var(--bad)"></i>lost</span>${Object.entries(TC).map(([k,c])=>`<span><i style="background:${c}"></i>${k}</span>`).join('')}</div><br>
+${CAMS.map((n,c)=>`<div class="tr"><span>${n}</span><div class="bar">${r.seg.filter(s=>s.c==c).map(s=>`<i class="sg ${s.st}" style="left:${s.h*100/24}%" title="${s.h}:00 ${LBL[s.st]}"></i>`).join('')}${ev.filter(e=>e.c==c).map(e=>`<u class="dt" style="left:${e.t/864}%;background:${TC[e.ty]}" title="${e.ty} ${tf(e.t)}"></u>`).join('')}</div></div>`).join('')}
+<div class="ax">${[0,3,6,9,12,15,18,21,24].map(h=>`<span>${h}h</span>`).join('')}</div></div>
+<div class="card"><h2>Cross-camera correlation</h2>${inc.length?inc.map((i,n)=>`<p><span class="tag b">Incident ${n+1}</span> ${tf(i[0].t)} to ${tf(i[i.length-1].t)} across ${new Set(i.map(e=>e.c)).size} cameras: ${i.map(e=>`${CAMS[e.c].split(' ')[0]} ${e.ty}`).join(' &rarr; ')}.</p><p class="mut">All ${i.filter(e=>e.src=='rec').length} events fall inside footage that was deleted and recovered.</p>`).join(''):'<p class="mut">No multi-camera incidents.</p>'}</div>
+<div class="card"><h2>Detections (simulated AI: person, face, vehicle, motion)</h2><div class="wrap"><table><tr><th>Time</th><th>Camera</th><th>Type</th><th>Confidence</th><th>Source</th></tr>${[...ev].sort((a,b)=>a.t-b.t).map(e=>`<tr><td class="mono">${tf(e.t)}</td><td>${CAMS[e.c]}</td><td><i style="color:${TC[e.ty]}">&#9679;</i> ${e.ty}</td><td>${Math.round(e.cf*100)}%</td><td><span class="tag ${e.src=='rec'?'d':''}">${LBL[e.src]}</span></td></tr>`).join('')}</table></div>
+<button class="btn np" onclick="toReport()">Generate report</button></div>`}
+function vRep(){const e=S.ev,r=S.rec,inc=incidents(r.ev).filter(i=>i.length>1);
+return `<h1>Custody and report</h1><div class="card np"><button class="btn" onclick="vh()">Re-verify evidence hash</button><button class="btn s" onclick="vc()">Verify custody chain</button><button class="btn s" onclick="tamper()">Run tamper test</button><button class="btn s" onclick="try{print()}catch(x){}">Print or save as PDF</button><p>${S.m}</p></div>
+<div class="doc"><h2>Digital forensic examination report</h2><p class="mut">${esc(S.c.no)} | Examiner: ${esc(S.c.inv)} | ${esc(S.c.ag)} | Generated ${new Date().toISOString()}</p>
+<h2>1. Evidence</h2><table><tr><th>Item</th><td>${esc(e.name)} (${e.size.toLocaleString()} bytes)${e.demo?' <span class="tag d">simulated demo</span>':''}</td></tr><tr><th>MD5</th><td class="mono">${e.md5}</td></tr><tr><th>SHA-256</th><td class="mono">${e.sha}</td></tr><tr><th>Device</th><td>${esc(e.v.name)} (${e.v.conf}% confidence), profile ${esc(prof())}</td></tr></table>
+<h2>2. Findings</h2><ul><li>${r.n('rec')} deleted segments recovered; ${r.n('gap')} segments overwritten and unrecoverable.</li><li>Device clock offset of ${OFF}s corrected to reference time.</li><li>${inc.length} correlated multi-camera incident(s), 14:30:55 to 14:35:10, inside recovered footage.</li></ul>
+<h2>3. Chain of custody (hash-chained)</h2><div class="wrap"><table><tr><th>#</th><th>UTC time</th><th>Action</th><th>Detail</th><th>Entry hash</th></tr>${S.coc.map((c,i)=>`<tr><td>${i+1}</td><td class="mono">${c.t}</td><td>${c.a}</td><td>${esc(c.d)}</td><td class="mono">${c.h.slice(0,12)}...</td></tr>`).join('')}</table></div>
+<h2>4. Limitations</h2><p class="mut">Detections and recording index in this prototype are simulated. Validate every vendor parser on reference images before court use.</p></div>`}
+function vOem(){return `<h1>OEM comparison</h1><p class="mut">Supported recorder families and how each is handled.</p><div class="card wrap"><table><tr><th>OEM</th><th>File system</th><th>Stream format</th><th>Detection</th><th>Status</th></tr>${V.map(v=>`<tr>${v.map((x,i)=>`<td>${i==4?`<span class="tag ${x[0]=='F'?'g':x[0]=='P'?'d':''}">${x}</span>`:x}</td>`).join('')}</tr>`).join('')}</table>
+<p class="mut">*OEM family mapping is heuristic. Beta profiles use generic H.264/H.265 carving until vendor parsers are built from lab reference images.</p></div>`}
+function vCases(){const C=[['Barabanki court, UP (2022-23)','High Court doubted CCTV footage: only 14 of 32 cameras worked. Footage sent to the FSL Lucknow for deletion/tampering checks.','Per-channel coverage'],['Delhi Chief Secretary case (Feb 2018)','Police alleged footage was tampered with and the recorder clock was altered. Hard disk sent to the FSL.','Clock-offset correction'],['Albert Ojwang custody death, Kenya (2025)','A technician said he was asked to delete two days from a 30-day DVR, which had already been accessed.','Recovery from unallocated space'],['Badrinath and Ayodhya temple probes (recent)','SITs seized recorders, reported deleted footage and short retention (45 days at Ayodhya). Allegations, under investigation.','Fast read-only acquisition']];
+return `<h1>Past cases</h1><p class="mut">Public reports that show the gaps FrameTrace closes. Allegations are not findings. Full sources are in docs/case-studies.md.</p>`+C.map(c=>`<div class="card"><h2>${c[0]}</h2><p>${c[1]}</p><span class="tag g">FrameTrace: ${c[2]}</span></div>`).join('')+`<div class="card"><h2>Research precedents</h2><p class="mut">Han et al. 2015 (Hikvision file system, signature HIKVISION@HANGZHOU), Rzayeva et al. 2025 (automated Hikvision and Dahua recovery), DFRWS 2026 (Honeywell file system analysis).</p></div>`}
+function render(){nav();const m=$('#main');m.innerHTML=[vCase,vAcq,()=>S.ev?vRec():vAcq(),()=>S.rec?vTl():vRec(),()=>S.rec?vRep():vRec(),vOem,vCases][S.step]();window.scrollTo(0,0)}
+render();
+</script></body></html>
